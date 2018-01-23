@@ -2,8 +2,6 @@ const Discordie = require('discordie');
 const Events = Discordie.Events;
 const client = new Discordie();
 const cluster = require('cluster');
-const request = require('request');
-const users = require("./posts.json");
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
  
