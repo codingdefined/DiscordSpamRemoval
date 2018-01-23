@@ -1,0 +1,21 @@
+{
+  "name": "DiscordSpamRemoval",
+  "version": "1.0.0",
+  "description": "A discord Bot for removing suplicate posts promotions",
+  "main": "postpromotion.js",
+  "scripts": {
+    "start": "node postpromotion.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": "8.6.0"
+  },
+  "author": "Hemant Joshi <codingdefined@gmail.com> (http://www.codingdefined.com)",
+  "license": "MIT",
+  "dependencies": {
+    "cluster": "^0.7.7",
+    "discordie": "^0.11.0",
+    "request": "^2.83.0",
+    "sqlite3": "^3.1.13"
+  }
+}
