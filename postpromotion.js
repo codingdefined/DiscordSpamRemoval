@@ -23,9 +23,9 @@ if (cluster.isMaster) {
 } else {
     console.log(`Worker ${process.pid} started`);
 
-    client.connect({
-        token: 'Bot Token'
-    });
+    var auth = { token: 'Bot Token' };
+
+    client.connect(auth);
 
     client.Dispatcher.on(Events.GATEWAY_READY, e => {
         console.log('Connected as: ' + client.User.username);
@@ -37,20 +37,32 @@ if (cluster.isMaster) {
         }
         checkPosts(e);
     });
+
+    // Automatically reconnect if the bot disconnects due to inactivity
+    client.Dispatcher.on(Events.DISCONNECTED, e => {
+        console.log('----- Bot disconnected, Restarting it---');
+        client.connect(auth);
+    });
 }
 
 function checkPosts(event) {
 
-    let isPostValid = !!event.message.content.match(
-        /(http|https):\/\/(www\.steemit\.com\/|steemit\.com\/|busy\.org\/|www\.busy\.org\/)/g
+    var url = event.message.content.match(/\bhttps?:\/\/\S+/gi);
+    console.log(url);
+    let isPostValid = !!url[0].match(
+        /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/g
     );
     console.log(isPostValid);
+
     if (isPostValid) {
         isUserAddedPost(event)
             .then(function(item) {
                 console.log(item);
                 if(item) {
-                    var postValue = event.message.content.split('@')[1].split('/')[1];
+                    var postValue = event.message.content;
+                    if(event.message.content.indexOf('@') !== -1){
+                        postValue = event.message.content.split('@')[1].split('/')[1];
+                    }
                     var currentCreatedTimestamp = event.message.edited_timestamp || event.message.timestamp;
                     console.log(currentCreatedTimestamp);
                     console.log(item.time);
@@ -61,8 +73,8 @@ function checkPosts(event) {
                     if(postValue === item.post) {
                         event.message.reply('You have Already Shared the Post before, your post is deleted');
                         event.message.delete();
-                    } else if(timeDiff < 2) {
-                        event.message.reply('You should only share the post once in 2 hours, your post is deleted');
+                    } else if(timeDiff < 12) {
+                        event.message.reply('You should only share the post once in 12 hours, your post is deleted');
                         event.message.delete();
                     } else {
                         db.serialize(function() {
