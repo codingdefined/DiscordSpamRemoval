@@ -1,6 +1,6 @@
 const Discordie = require('discordie');
 const Events = Discordie.Events;
-const client = new Discordie();
+const client = new Discordie({autoReconnect: true});
 const cluster = require('cluster');
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
@@ -23,7 +23,7 @@ if (cluster.isMaster) {
 } else {
     console.log(`Worker ${process.pid} started`);
 
-    var auth = { token: 'Bot Token' };
+    var auth = { token: "" };
 
     client.connect(auth);
 
