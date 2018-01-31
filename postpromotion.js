@@ -48,6 +48,10 @@ if (cluster.isMaster) {
 function checkPosts(event) {
 
     var url = event.message.content.match(/\bhttps?:\/\/\S+/gi);
+    // Check if the URL is null or not
+    if(url === null) {
+        return;
+    }
     console.log(url);
     let isPostValid = !!url[0].match(
         /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/g
