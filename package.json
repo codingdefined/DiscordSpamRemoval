@@ -1,6 +1,6 @@
 {
   "name": "DiscordSpamRemoval",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A discord Bot for removing suplicate posts promotions",
   "main": "postpromotion.js",
   "scripts": {
