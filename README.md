@@ -14,3 +14,10 @@ As of now the Bot will save the Channel ID where the posts have been written alo
 
 The code is freely available in Github which you can fork and create a pull request. If you need any feature to be added, you can also talk to me on the Discord (Id - codingdefined) or create an issue.
 
+# V1.1
+
+- Reconnect - If the Bot disconnected because of Discord WebSocket issue, the bot was not reconnecting on its own. So I have added an option of reconnection whenever it disconnected.
+- Was using only Steemit and Busy link previously, now made it generic where if you post any link it will not allow if its duplicate and changed the time period from 2 to 12 hours.
+- $last option - I have also added an option so that people can check when they have last posted using $last
+- Requirements to Add multiple links in different channel - There was a requirement that I can post the same link in two different channels, two different links in same channel, two different links in two different channels and a link can be posted max twice in the server across all the channels.
+
