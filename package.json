@@ -16,6 +16,7 @@
     "cluster": "^0.7.7",
     "discordie": "^0.11.0",
     "request": "^2.83.0",
-    "sqlite3": "^3.1.13"
+    "sqlite3": "^3.1.13",
+    "time_ago_in_words": "^1.2.1"
   }
 }
