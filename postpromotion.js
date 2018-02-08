@@ -72,6 +72,7 @@ function getUserLastPost(event){
 }
 
 function checkPosts(event) {
+
     var url = event.message.content.match(/\bhttps?:\/\/\S+/gi);
     // Check if the URL is null or not
     if(url === null) {
@@ -85,30 +86,52 @@ function checkPosts(event) {
 
     if (isPostValid) {
         isUserAddedPost(event)
-            .then(function(item) {
-                console.log(item);
-                if(item) {
+            .then(function(allRows) {
+                if(allRows != null && allRows.length > 0) {
                     var postValue = event.message.content;
                     if(event.message.content.indexOf('@') !== -1){
                         postValue = event.message.content.split('@')[1].split('/')[1];
                     }
                     var currentCreatedTimestamp = event.message.edited_timestamp || event.message.timestamp;
-                    console.log(currentCreatedTimestamp);
-                    console.log(item.time);
+
+                    var count = 0;
+                    allRows.forEach(function (row){
+                        if(row.post === postValue) {
+                            count++;
+                        }
+                    });
+                    if(count >= 2) {
+                        event.message.reply('One link can be posted max 2 times across channels, you have already shared this post 2 times your post is deleted');
+                        event.message.delete();
+                        throw new Error("Exit");
+                        return null;
+                    }
+                    var linkPostedin24Hours = 0;
                     var d1 = new Date(currentCreatedTimestamp);
-                    var d2 = new Date(item.time);
-                    var timeDiff = Math.abs(d1 - d2) / 36e5;
-                    console.log(timeDiff);
-                    if(postValue === item.post) {
-                        event.message.reply('You have Already Shared the Post before, your post is deleted');
+                    allRows.forEach(function (row){
+                        var d2 = new Date(row.time);
+                        var timeDiff = Math.abs(d1 - d2) / 36e5;
+                        if(timeDiff < 24) {
+                            linkPostedin24Hours++;
+                        }
+                    });
+                    if(linkPostedin24Hours > 2) {
+                        event.message.reply('You can post max 2 links in 24 hours hence your post is deleted');
                         event.message.delete();
-                    } else if(timeDiff < 12) {
-                        event.message.reply('You should only share the post once in 12 hours, your post is deleted');
+                        throw new Error("Exit");
+                        return null;
+                    }
+
+                    let obj = allRows.find(o => o.post === postValue && o.channel_id === event.message.channel_id);
+                    if(obj) {
+                        event.message.reply('You have Already Shared the Post before in this channel, your post is deleted');
                         event.message.delete();
+                        throw new Error("Exit");
+                        return null;
                     } else {
                         db.serialize(function() {
-                            let data = [postValue, currentCreatedTimestamp, item.discordName];
-                            db.run("UPDATE posts_info SET post=?,time=? where discordName=?", data);
+                            var data = [event.message.author.id,postValue,currentCreatedTimestamp,event.message.channel_id];
+                            db.run("INSERT into posts_info(discordName,post,time,channel_id) VALUES (?,?,?,?)",data);
                         });
                     }
                 }
