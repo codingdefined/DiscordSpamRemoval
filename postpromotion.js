@@ -4,6 +4,7 @@ const client = new Discordie({autoReconnect: true});
 const cluster = require('cluster');
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
+const time_ago = require('time_ago_in_words');
  
 let db = new sqlite3.Database('posts.db');
 
@@ -35,7 +36,12 @@ if (cluster.isMaster) {
         if (e.message.author.bot) {
             return;
         }
-        checkPosts(e);
+        const content = e.message.content;
+        if(content.indexOf('$last') === 0){
+            getUserLastPost(e);
+        }else{
+            checkPosts(e);
+        }
     });
 
     // Automatically reconnect if the bot disconnects due to inactivity
@@ -45,8 +51,27 @@ if (cluster.isMaster) {
     });
 }
 
-function checkPosts(event) {
+function getUserLastPost(event){
+    db.serialize(function() {
+        var selectData = [event.message.author.id];
+        db.all("SELECT discordName, post, time, channel_id FROM posts_info WHERE discordName=?",selectData, function(err, allRows) {
+            if (err){
+                console.log(err);
+                event.message.reply('There is some problem in retrieving the Last Details');
+            }
+            else if(allRows) {
+                allRows.sort(function(a,b){
+                  return new Date(b.time) - new Date(a.time);
+                });
+                var lastPost = allRows[0].post;
+                var lastPostTime = time_ago(new Date(allRows[0].time) - (1000 * 60));
+                event.message.reply('You have last posted ' + lastPostTime);
+            }
+        });
+    })
+}
 
+function checkPosts(event) {
     var url = event.message.content.match(/\bhttps?:\/\/\S+/gi);
     // Check if the URL is null or not
     if(url === null) {
